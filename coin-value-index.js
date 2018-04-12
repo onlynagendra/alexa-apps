@@ -1,6 +1,7 @@
 'use strict';
 var http = require('http');
 var https = require('https');
+var coinmap = new Map();
 exports.handler = function(event,context) {
 	var request = event.request;
 	var session = event.session;
@@ -8,6 +9,8 @@ exports.handler = function(event,context) {
 	if (!event.session.attributes){
 		event.session.attributes = {};
 	}
+
+    populateCoinMap();
 
 	if ( request.type === "LaunchRequest") {
 		handleLaunchRequest(context);
@@ -23,7 +26,10 @@ exports.handler = function(event,context) {
 
 }
 
-
+function populateCoinMap(){
+    coinmap.set('bitcoin',"BTC");
+    coinmap.set('ethereum',"ETH");
+}
 
 function buildResponse(options) {
  
@@ -113,37 +119,23 @@ function handleCoinValueIntentRequest(request,context,session){
     let option = {};
     let intentvalue = request.intent.slots.Coin.value;
 				
-					if (intentvalue === "bitcoin"){
-									
-                        getPriceQuote("BTC",function(quote,err){
+					if (coinmap.get(intentvalue)){
+                        getPriceQuote(coinmap.get(intentvalue),function(quote,err){
                             if(err) {
                                 context.fail(err);
                             } else {
                                 
-                                option.speechText = `The price of Bitcoin is `;
-                                option.speechText += ' ';
+                                option.speechText = `The price of `;
+                                option.speechText += intentvalue;
+                                option.speechText += ' is ';
                                 option.speechText += quote.USD;
                                 option.speechText += ' US Dollars';
                                 option.endSession = true;
                                 context.succeed(buildResponse(option));	
                             }
-                    });
-                    }else if (intentvalue === "ethereum"){
-									
-                        getPriceQuote("ETH",function(quote,err){
-                            if(err) {
-                                context.fail(err);
-                            } else {
-                                
-                                option.speechText = `The price of Ethereum is `;
-                                option.speechText += ' ';
-                                option.speechText += quote.USD;
-                                option.speechText += ' US Dollars';
-                                option.endSession = true;
-                                context.succeed(buildResponse(option));	
-                            }
-                    });	
-                    }else {
+                         });   
+                    }
+                	else {
 							option.speechText = "I don't understand what you are asking";
 							option.endSession = true;
 							context.succeed(buildResponse(option));
