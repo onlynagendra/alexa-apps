@@ -1,3 +1,11 @@
+/*
+    Simpple Lanbda function and integration with Alexa to get the prices for various coins
+    API for getting the coin value from https://min-api.cryptocompare.com/
+    via creative commons license.
+    I don't control the API or its performance. If the data returned is not correct, don't blame me for any loss
+    This code is provided as is without any warranty of anykind. 
+    -Nagendra
+*/
 'use strict';
 var http = require('http');
 var https = require('https');
@@ -15,7 +23,6 @@ exports.handler = function(event,context) {
 	if ( request.type === "LaunchRequest") {
 		handleLaunchRequest(context);
     } else {
-        let option1 = {};
         if ( request.intent.name === "CoinValue") {
             handleCoinValueIntentRequest(request,context,session);
         }
